@@ -8,6 +8,14 @@ int chessBoard[3][3]={{0,0,0},{0,0,0},{0,0,0}};
 #define GAP 2
 #define SHAPE_UNITS 16
 
+
+
+void safeFlush(FILE *fp)
+{
+    int ch;
+    while( (ch = fgetc(fp)) != EOF && ch != '\n' );
+}
+
 /**
  * @brief Read a shape from a file
  * @param file The file to read
@@ -69,43 +77,56 @@ void shapeSelection(int size, int *user1, int *user2){
     int scanfResult;
 
     do{
-        printf("Please select a shape ID for USER1 from 1 to %d: ", size);
+        printf("[msg] Please select a shape ID for USER1 from 1 to %d: ", size);
         scanfResult = scanf("%d", user1);
+        safeFlush(stdin);
+
         if (scanfResult == 0) {
             while ((getchar()) != '\n');
-            printf("--Invalid shape ID.\n");
+            printf("[Alert] Invalid shape ID.\n");
         }else if (*user1 < 1 || *user1 > size){
-            printf("--Invalid shape ID.\n");
+            printf("[Alert] Invalid shape ID.\n");
         }else break;
     }while(1);
     do{
-        printf("Please select a shape ID for USER2 from 1 to %d: ", size);
+        printf("[msg] Please select a shape ID for USER2 from 1 to %d: ", size);
         scanfResult = scanf("%d", user2);
+        safeFlush(stdin);
+
         if (scanfResult == 0) {
             while ((getchar()) != '\n');
-            printf("--Invalid shape ID.\n");
+            printf("[Alert] Invalid shape ID.\n");
         }else if (*user2 < 1 || *user2 > size){
-            printf("--Invalid shape ID.\n");
+            printf("[Alert] Invalid shape ID.\n");
         }else if (*user1 == *user2) {
-            printf("--You cannot select the same shape.\n");
+            printf("[Alert] You cannot select the same shape.\n");
         }
         else break;
     }while(1);
 
-    printf("\n\n [Note] You selected shape %d for USER1 and shape %d for USER2 \n\n", *user1, *user2);
+    printf("\n\n[Note] You selected shape %d for USER1 and shape %d for USER2 \n\n", *user1, *user2);
 }
 
 float drawTheGrid()
 {
     char buffer[100];
     float gridSize;
-    printf("Please Select a Grid Size (30-100)(mm):");
-    scanf("%f",&gridSize);
-    while(gridSize < 30 || gridSize > 100)
-    {
-        printf("Please Reselect the Grid Size:");
-        scanf("%f", &gridSize);
-    }
+    int scanfResult = 0;
+    printf("[msg] Please Select a Grid Size (30-100)(mm):");
+
+    do{
+        scanfResult = scanf("%f",&gridSize);
+        safeFlush(stdin);
+
+        if (scanfResult == 0) {
+            while ((getchar()) != '\n');
+        }else if (gridSize < 30 || gridSize > 100){
+            //do nothing
+        }else break;
+        printf("[Alert] Invalid Grid Size. \n");
+        printf("[msg] Please Reselect the Grid Size(30-100)(mm):");
+    }while(1);
+
 
     // Initialise the Robot
     sprintf (buffer, "G1 X0 Y0 F1000\n");
@@ -166,8 +187,8 @@ float reScale(float gridSize){
 }
 
 void getStartPosition(int x, int y, float gridSize, float *startX, float *startY){
-    *startX = 2 + (x-1)*gridSize/3.0f;
-    *startY = 2 - (4-y)*gridSize/3.0f;
+    *startX = 2.0f + (float)(x-1) * gridSize/3.0f;
+    *startY = 2.0f - (float)(4-y) * gridSize/3.0f;
 }
 
 void drawShape(Shape shape, int x, int y, float scale, float gridSize){
@@ -177,20 +198,30 @@ void drawShape(Shape shape, int x, int y, float scale, float gridSize){
     runSingleStep(startX, startY, 0, 0);
 
     for(int i = 0; i < shape.numStrokes; i++){
-        runSingleStep(shape.strokes[i].x * scale + startX, shape.strokes[i].y * scale + startY, shape.strokes[i].penStatus, lastStatues);
+        runSingleStep((float)shape.strokes[i].x * scale + startX, (float)shape.strokes[i].y * scale + startY, shape.strokes[i].penStatus, lastStatues);
         lastStatues = shape.strokes[i].penStatus;
     }
     resetRobot();
+    printf("[info] Current step has been completed\n");
 }
 
 void moveSelection(int* x, int *y, int userID){
+    int scanfResult = -1;
     printf("[msg] Player %d, please choose your next move: ", userID);
-        scanf("%d %d", x, y);
-        while(*x < 1 || *x > 3 || *y < 1 || *y > 3 || chessBoard[*x - 1 ][*y - 1 ] != 0){
+    do{
+        scanfResult = scanf("%d %d", x, y);
+        safeFlush(stdin);
+
+        if (scanfResult == 0) {
+            while ((getchar()) != '\n');
+            printf("[Alert] Invalid move.\n");
+            printf("[msg] Player %d, please try again: ", userID);
+        }else if (*x < 1 || *x > 3 || *y < 1 || *y > 3 || chessBoard[*x - 1 ][*y - 1 ] != 0){
             printf("[Alert] This postion is either occupied or not valid.\n");
             printf("[msg] Player %d, please try again: ", userID);
-            scanf("%d %d", x, y);
-    }
+        }else break;
+    }while(1);
+
     chessBoard[*x - 1 ][*y - 1 ] = userID;
 }
 
@@ -271,7 +302,7 @@ void gameLoop(float gridSize, Shape shape1, Shape shape2){
             break;
         }
 
-
         roundNumber ++;
     }
 }
+

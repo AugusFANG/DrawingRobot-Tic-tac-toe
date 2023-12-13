@@ -18,6 +18,7 @@ typedef struct Shape{
     struct PenStroke *strokes;
 }Shape;
 
+void safeFlush(FILE *fp);
 int ReadShape (Shape **shapeList, FILE *file);
 void freeShape(Shape *shapeList, int size);
 void shapeSelection(int size, int *user1, int *user2);
