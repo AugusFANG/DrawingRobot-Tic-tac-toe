@@ -150,7 +150,7 @@ int WaitForDollar (void)
     return (0);
 }
 
-#endif 
+#endif
 
 
 

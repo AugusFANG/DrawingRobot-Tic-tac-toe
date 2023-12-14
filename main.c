@@ -22,7 +22,7 @@ int main()
     }
     Shape *shapeList = NULL;
     int shapeListSize = 0;
-    shapeListSize = ReadShape(&shapeList, file);
+    shapeListSize = readShape(&shapeList, file);
     fclose(file);
 
     int user1 = 0, user2  = 0;
@@ -57,9 +57,7 @@ int main()
     // Draw the grid and start the game.
     float gridSize;
     gridSize = drawTheGrid();
-    printf("Grid size: %f\n", gridSize);
     gameLoop(gridSize, shapeList[user1-1],  shapeList[user2-1]);
-
 
 
 
